@@ -34,6 +34,10 @@ Available dataset/model combinations are:
 - `legacy`: Vectorized Preparation
 - `legacy-iterative`: Iterative Preparation
 
+The `final-parallel` version under `final-version/` is a cleaned up version of `by-row`. 
+All experiments were done using the `by-row` version from experimental versions. 
+
+
 > Appending `2>/dev/null | grep "Total elapsed time" | awk '{print $4}' | tr \, \.)` allows to only output the runtime.
 
 ### Cluster execution
