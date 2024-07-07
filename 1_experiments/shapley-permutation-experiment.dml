@@ -27,9 +27,8 @@
 source("final-version/shap-explainer.dml") as shapExplainer
 source("experimental-versions/shapley-permutation-opt.dml") as shapleyPermutation
 source("experimental-versions/shapley-permutation.dml") as shapleyPermutationLegacy
-source("experimental-versions/shapley-utils.dml") as shapleyUtils
 #maybe neccessary to manually use ff_pass instead of buitlin ffPRedcit
-source("<path-to-ff_pass>") as ff_pass
+#source("<path-to-ff_pass>") as ff_pass
 
 # defaults
 model_type= ifdef($model_type, "multiLogRegPredict")
@@ -80,10 +79,10 @@ x = X_bg[1:rows_to_explain,]
 #compute shapley values
 if(execution_policy == 'final-parallel'){
   #final method
-  [phis, expected] = shapExplainer::shap_explainer_parallel(
+  [S, expected] = shapExplainer::shap_explainer_parallel(
   model_function=model_function,
   model_args=list(B=B),
-  x=x,
+  x_multirow=x,
   X_bg=X_bg,
   n_permutations=n_permutations,
   integration_samples=integration_samples,

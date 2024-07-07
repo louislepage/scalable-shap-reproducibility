@@ -18,7 +18,7 @@
 # under the License.
 #
 #-------------------------------------------------------------
-source("shap-utils.dml") as shapUtils
+source("final-version/shap-utils.dml") as shapUtils
 
 # Computes shapley values for multiple instances in parallel using antithetic permutation sampling.
 # The resulting matrix phis holds the shapley values for each feature in the column given by the index of the feature in the sample.

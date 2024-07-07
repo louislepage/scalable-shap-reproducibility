@@ -19,7 +19,7 @@
 #
 #-------------------------------------------------------------
 #TODO: get path from project src?
-source("../shapley-utils.dml") as shapleyUtils
+source("experimental-versions/shapley-utils.dml") as shapleyUtils
 
 # This is a wrapper for the different permutation explainers. It tries to be smart about choosing the execution policy.
 #
