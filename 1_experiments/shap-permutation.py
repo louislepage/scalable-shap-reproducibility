@@ -67,13 +67,28 @@ if args.model_type == "ffn":
 #test model
 y_pred = model.predict(X_test)
 
-if args.model_type != "ffn":
+if args.model_type == "multiLogReg":
     accuracy = sk.metrics.accuracy_score(y_test, y_pred)
     conf_matrix = sk.metrics.confusion_matrix(y_test, y_pred)
 
     if not args.silent:
         print(f"Accuracy: {accuracy}")
         print(f"Confusion Matrix:\n{conf_matrix}")
+
+#%%
+#add faster svm function
+bias=[]
+if args.model_type == "l2svm":
+    bias = np.genfromtxt(args.data_dir+"census_bias.csv", delimiter=',')
+def l2svmPredict(X):
+    W=bias
+    n, m = X.shape
+    wn = len(W)
+    if m != wn:
+        YRaw = np.dot(X, W[:m-1]) + W[m]
+    else:
+        YRaw = np.dot(X, W)
+    return YRaw
 
 #%%
 #create SHAP  explainer
@@ -85,9 +100,9 @@ permutation_explainer = None
 if args.model_type == "multiLogReg":
     permutation_explainer = shap.explainers.Permutation(model.predict_proba, shap.maskers.Independent(df_x.values, max_samples=int(args.n_samples)))
 elif args.model_type == "l2svm":
-    permutation_explainer = shap.explainers.Permutation(model.decision_function, shap.maskers.Independent(df_x.values, max_samples=int(args.n_samples)))
+    permutation_explainer = shap.explainers.Permutation(l2svmPredict, shap.maskers.Independent(df_x.values, max_samples=int(args.n_samples)))
 elif args.model_type == "ffn":
-    predict_func = lambda x: model.predict(x, verbose=0)
+    predict_func = lambda x: model.predict(x, verbose=0, batch_size=1028)
     permutation_explainer = shap.explainers.Permutation(predict_func, shap.maskers.Independent(df_x.values, max_samples=int(args.n_samples)))
 else:
     print("Model of type "+args.model_type+" unknown.")
