@@ -249,11 +249,12 @@ return (Matrix[Double] row_phis, Double expected){
   #replicate background and mask it, since it also can stay the same for every row
   masked_bg_for_permutations = prepare_masked_X_bg(masks_for_permutations, X_bg_samples)
   shapleyUtils::u_vprint("-> Computing phis in parallel.", verbose )
-
+	
+  
   #use below parfor to force in spark
-  #parfor (i in 1:nrow(x_multirow), opt=CONSTRAINED, mode=REMOTE_SPARK ){
+  parfor (i in 1:nrow(x_multirow), opt=CONSTRAINED, mode=REMOTE_SPARK ){
 
-  parfor (i in 1:nrow(x_multirow)){
+  #parfor (i in 1:nrow(x_multirow)){
     if(remove_non_var == 1){
       # try to remove inds that do not vary from the background
       non_var_inds = get_non_varying_inds(x_multirow[i], X_bg_samples)
@@ -282,9 +283,29 @@ return (Matrix[Double] row_phis, Double expected){
     X_arg = append(list(X=X_test), model_args)
 
     #call model
-    P = eval(model_function, X_arg)
+    P = as.matrix(0)
+    if (model_function == 'shap_multiLogRegPredict_custom') {
+	  P = shap_multiLogRegPredict_custom(X=X_test, B=model_args)
+    } else if (model_function == 'shap_ffPredict_custom') {
+	  P = ffPredict(model=model_args, X=X_test, batch_size=1028)
+    } else if (model_function == 'shap_l2svmPredict_custom') {
+	  P = shap_l2svmPredict_custom(X=X_test, B=model_args)
+    } else if (model_function == 'shap_ffPredict_1l_custom') {
+      P = shap_ffPredict_1l_custom(X=X_test, B=model_args)
+    } else if (model_function == 'shap_ffPredict_2l_custom') {
+      P = shap_ffPredict_2l_custom(X=X_test, B=model_args)
+    } else if (model_function == 'shap_ffPredict_4l_custom') {
+      P = shap_ffPredict_4l_custom(X=X_test, B=model_args)
+    } else if (model_function == 'shap_ffPredict_8l_custom') {
+      P = shap_ffPredict_8l_custom(X=X_test, B=model_args)
+    } else {
+	  print('ERROR: No model matched in eval hotfix.')
+    }
+    #P = eval(model_function, X_arg)
+    #P = shap_multiLogRegPredict_custom(X=X_test, B=as.matrix(model_args[1]))
+    #P = shap_ffPredict_custom(X=X_test, B=model_args[1])
+    #P = ffPredict(model=as.list(model_args[1]), X=X_test, batch_size=1028)
     #P = shap_l2svmPredict_custom(X=X_test, B=as.matrix(model_args[1]))
-    #P = shap_lmPredict_custom(X=X_test, B=as.matrix(model_args[1]))
     #compute means, deviding n_rows by integration_samples
     P = compute_means_from_predictions(P=P, integration_samples=integration_samples)
 
@@ -500,8 +521,8 @@ return (Matrix[Double] masks){
       for ( i in 1:ncol(partitions) ){
         p_start = as.scalar(partitions[1,i])
         p_end   = as.scalar(partitions[2,i])
-        proxy = masks[,p_start] %*% matrix(1, rows=1, cols=p_end-p_start)
-        masks[,p_start+1:p_end] = proxy
+        test = masks[,p_start] %*% matrix(1, rows=1, cols=p_end-p_start)
+        masks[,p_start+1:p_end] = test
       }
     }
   }
@@ -722,6 +743,15 @@ return(Matrix[Double] phis, Double expected){
   expected=mean(P_perm[1])
 }
 
+#functions to repalce eval()
+
+# function to wrap multiLogRegPredict to make sure its outputs are compatible
+shap_multiLogRegPredict_custom = function(Matrix[Double] X, Matrix[Double] B)
+return( Matrix[Double] P){
+  [M,yhat,acc] = multiLogRegPredict(X=X, B=B,Y=matrix(0,0,0), verbose=FALSE)
+  P = M[,2]
+}
+
 # function to wrap l2svmPredict to make sure its outputs are compatible
 shap_l2svmPredict_custom = function(Matrix[Double] X, Matrix[Double] B)
 return( Matrix[Double] P){
@@ -734,9 +764,29 @@ return( Matrix[Double] P){
   P = lmPredict(X=X, B=B, ytest=matrix(0,1,1), verbose=FALSE)
 }
 
-toOneHot = function(Matrix[Double] X, integer numClasses)
-  return (Matrix[Double] Y) {
-  if(numClasses < max(X))
-    stop("numClasses must be >= largest value in X to prevent cropping")
-  Y = table(seq(1, nrow(X)), X, nrow(X), numClasses)
+# function to wrap ffPredict to make sure its outputs are compatible
+shap_ffPredict_custom = function(Matrix[Double] X, List[unknown] B)
+return( Matrix[Double] P){
+  P = ffPredict(model=B, X=X, batch_size=1028)
+}
+
+#functions for different fnn layers
+shap_ffPredict_1l_custom = function(Matrix[Double] X, List[unknown] B)
+return( Matrix[Double] P){
+  P = ffPredict_layerVariation::ffPredict1(model=B, X=X, batch_size=512)
+}
+
+shap_ffPredict_2l_custom = function(Matrix[Double] X, List[unknown] B)
+return( Matrix[Double] P){
+  P = ffPredict_layerVariation::ffPredict2(model=B, X=X, batch_size=512)
+}
+
+shap_ffPredict_4l_custom = function(Matrix[Double] X, List[unknown] B)
+return( Matrix[Double] P){
+  P = ffPredict_layerVariation::ffPredict4(model=B, X=X, batch_size=512)
+}
+
+shap_ffPredict_8l_custom = function(Matrix[Double] X, List[unknown] B)
+return( Matrix[Double] P){
+  P = ffPredict_layerVariation::ffPredict8(model=B, X=X, batch_size=512)
 }

@@ -19,7 +19,7 @@
 #
 #-------------------------------------------------------------
 #TODO: get path from project src?
-source("../shapley-utils.dml") as shapleyUtils
+source("experimental-versions/shapley-utils.dml") as shapleyUtils
 
 
 # Computes shapley values by running throgh permutations.

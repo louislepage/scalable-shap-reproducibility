@@ -286,3 +286,10 @@ u_vprint = function(String message, Boolean verbose){
 u_pm = function(String name, Matrix[Double] m){
   print(name+":\n"+toString(m))
 }
+
+toOneHot = function(Matrix[Double] X, integer numClasses)
+  return (Matrix[Double] Y) {
+  if(numClasses < max(X))
+    stop("numClasses must be >= largest value in X to prevent cropping")
+  Y = table(seq(1, nrow(X)), X, nrow(X), numClasses)
+}

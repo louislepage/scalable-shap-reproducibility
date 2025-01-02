@@ -24,7 +24,7 @@ echo "Beginning download of Adults"
 
 # Change directory to data.
 if [[ pwd != *"data"* ]]; then
-    cd "../data"
+    cd "$REPRO_BASE_PATH/data"
 fi
 
 
