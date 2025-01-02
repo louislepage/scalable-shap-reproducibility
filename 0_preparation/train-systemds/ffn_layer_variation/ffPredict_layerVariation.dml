@@ -1,9 +1,9 @@
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/layers/affine.dml") as affine
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/layers/l2_loss.dml") as l2_loss
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/layers/dropout.dml") as dropout
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/layers/relu.dml") as relu
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/layers/sigmoid.dml") as sigmoid
-source("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/nn/optim/sgd_nesterov.dml") as sgd_nesterov
+source("$SYSTEMDS_ROOT/scripts/nn/layers/affine.dml") as affine
+source("$SYSTEMDS_ROOT/scripts/nn/layers/l2_loss.dml") as l2_loss
+source("$SYSTEMDS_ROOT/scripts/nn/layers/dropout.dml") as dropout
+source("$SYSTEMDS_ROOT/scripts/nn/layers/relu.dml") as relu
+source("$SYSTEMDS_ROOT/scripts/nn/layers/sigmoid.dml") as sigmoid
+source("$SYSTEMDS_ROOT/scripts/nn/optim/sgd_nesterov.dml") as sgd_nesterov
 
 ffPredict1 = function(List[unknown] model, Matrix[double] X, Integer batch_size = 128)
   return(Matrix[Double] pred)

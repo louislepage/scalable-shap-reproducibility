@@ -1,8 +1,8 @@
 source("ffPredict_layerVariation.dml") as ffPredict_layerVar
 
 print("--> Loading prepared Dataset")
-X = read("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/staging/shapley_values/data/adult/Adult_X.csv");
-y = read("/Users/louislepage/Documents/uni/AMLS/project/louislepage/systemds/scripts/staging/shapley_values/data/adult/Adult_y.csv");
+X = read("$SYSTEMDS_ROOT/scripts/staging/shapley_values/data/adult/Adult_X.csv");
+y = read("$SYSTEMDS_ROOT/scripts/staging/shapley_values/data/adult/Adult_y.csv");
 y = y-1
 
 print("\n--> Testing model with 1 hidden layer.")
