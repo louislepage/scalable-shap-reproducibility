@@ -1,0 +1,54 @@
+#!/bin/bash
+
+
+# Function to check if a number is an integer between 1 and 8
+function is_valid_integer() {
+    local num="$1"
+    if [[ "$num" =~ ^[1-8]$ ]]; then
+        return 0  # Valid
+    else
+        return 1  # Invalid
+    fi
+}
+
+num_executors=$1
+
+if ! is_valid_integer "$num_executors"; then
+    echo "Error: The first argument must be an integer between 1 and 8."
+    exit 1
+fi
+
+shift
+
+# Client mode
+$SPARK_HOME/bin/spark-submit \
+      --master yarn \
+      --deploy-mode client \
+      --driver-memory 38g \
+      --num-executors "$num_executors" \
+      --executor-memory 230g \
+      --executor-cores 48 \
+      --conf spark.driver.extraJavaOptions="-XX:+UseParallelGC -Xms38g -Xmn3800m -Dlog4j.configuration=file:$HOME/systemds/log4j-silent.properties" \
+      --conf spark.ui.showConsoleProgress=true \
+      --conf spark.executor.heartbeatInterval=100s \
+      --conf spark.network.timeout=51200s \
+      --conf spark.executor.memoryOverhead=10000 \
+      file:$HOME/systemds/systemds-3.2.0.jar \
+      -debug \
+      -config $HOME/systemds/conf/SystemDS-config.xml \
+      "$@"
+
+
+# Cluster mode
+#if  [[ $1 = "-f" ]]; then
+#    hput $2 #put the dml file in hdfs
+#    runSpark_cluster.sh -f hdfs:/user/aphani/sigmod_lineage/$2 "${@:3}"
+#else
+#    echo "Use -f before file name"
+#fi
+
+# Useful JVM flags
+# -XX:+PrintCommandLineFlags  -> Prints all JVM flags including the type of GC
+# -XX:+UseParallelGC  -> Use Parallel GC (default in Java 8)
+# -XX:+UseConcMarkSweepGC -> Use CMS GC (deprecated since Java 9)
+# --conf spark.driver.extraJavaOptions="-XX:+UseParallelGC -Xms20g -Xmn2g....
